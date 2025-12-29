@@ -37,7 +37,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/Ai-summary.git
+git clone https://github.com/Zian502/Ai-summary.git
 cd Ai-summary
 
 # 选择语言目录
@@ -174,8 +174,8 @@ Ai-summary/
 ## 📧 联系方式
 
 如有问题或建议，欢迎：
-- 🐛 [提交 Issue](https://github.com/yourusername/Ai-summary/issues)
-- 💬 [发起讨论](https://github.com/yourusername/Ai-summary/discussions)
+- 🐛 [提交 Issue](https://github.com/Zian502/Ai-summary/issues)
+- 💬 [发起讨论](https://github.com/Zian502/Ai-summary/discussions)
 - 📮 发送邮件
 
 ---
@@ -184,7 +184,7 @@ Ai-summary/
 
 **⭐ 如果这个项目对你有帮助，请给一个 Star！⭐**
 
-Made with ❤️ by [梓安](https://github.com/yourusername)
+Made with ❤️ by [梓安](https://github.com/Zian502)
 
 </div>
 
