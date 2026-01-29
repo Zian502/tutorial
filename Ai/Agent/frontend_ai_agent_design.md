@@ -93,7 +93,112 @@ const { messages, append } = useChat({
 
 ---
 
-## 6. 前端开发行动建议
-1.  **采用 SSE (Server-Sent Events)**：比 WebSocket 更适合 LLM 的流式输出场景。
-2.  **组件化思维链**：将 Agent 的“动作”封装成可重用的 UI 组件（如 `SearchStep`, `CodeApplyStep`）。
-3.  **关注可访问性 (A11y)**：确保 AI 生成的内容对屏幕阅读器友好。
+## 7. 进阶：生成式 UI (Generative UI)
+这是前端 AI Agent 的终极形态：Agent 不仅生成文字，还直接生成可交互的 UI 组件。
+
+### 7.1 实现原理
+1. **工具调用 (Tool Calling)**：Agent 决定调用一个“渲染组件”的工具。
+2. **结构化数据 (Structured Data)**：Agent 输出符合组件 Props 定义的 JSON。
+3. **动态映射**：前端根据 JSON 自动渲染对应的 React 组件。
+
+### 7.2 伪代码实现 (基于 Vercel AI SDK)：
+```tsx
+// 1. 定义可用的 UI 组件库
+const components = {
+  StockChart: ({ symbol, data }) => <Chart symbol={symbol} data={data} />,
+  WeatherCard: ({ city, temp }) => <Weather city={city} temp={temp} />
+};
+
+// 2. 在 Chat 页面中渲染
+export default function AgentChat() {
+  const { messages } = useChat();
+
+  return (
+    <div>
+      {messages.map(m => (
+        <div key={m.id}>
+          {m.content}
+          {/* 如果有工具调用且任务已完成，渲染对应的 UI */}
+          {m.toolInvocations?.map(tool => {
+            const Component = components[tool.toolName];
+            return Component ? <Component {...tool.result} /> : null;
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## 8. 边缘侧推理：结合 WebLLM
+为了降低延迟和成本，可以将部分简单的推理任务（如：文本分类、摘要、简单的逻辑判断）放在浏览器端。
+
+### 8.1 技术选型
+- **WebLLM**：支持在浏览器中运行 Llama 3, Mistral 等模型，利用 WebGPU 加速。
+- **Transformers.js**：适合运行 Embedding 模型或轻量级 NLP 任务。
+
+### 8.2 混合架构 (Hybrid Inference)
+- **复杂任务**：路由到云端大模型（如 Claude 3.5）。
+- **简单/隐私任务**：直接在用户浏览器端运行本地模型。
+
+---
+
+## 9. 前端可观测性与调试 (Observability)
+Agent 的前端调试比传统应用更复杂，因为输出具有随机性。
+
+### 9.1 调试面板设计
+- **Prompt Inspector**：实时查看发送给 LLM 的完整 Prompt（包括隐藏的 System Message）。
+- **Token Counter**：监控当前会话的 Token 消耗。
+- **Step-by-step Trace**：展示 Agent 的思考链条，支持回溯到任意一步。
+
+### 9.2 错误处理策略
+- **重试机制**：当 LLM 输出格式错误时，自动发起“自我修正”请求。
+- **降级方案**：如果流式传输中断，提供“重新生成”按钮。
+
+---
+
+## 10. 多模态交互设计 (Multimodal Interactions)
+现代 Agent 不再局限于文本，前端需要处理图像、语音甚至视频的输入输出。
+
+### 10.1 视觉感知 (Vision)
+- **截图工具**：前端集成 html2canvas 或浏览器原生 API，允许 Agent “看到”当前页面。
+- **拖拽上传**：支持图片拖拽，Agent 自动调用 Vision 模型进行分析。
+
+### 10.2 语音交互 (Voice/Audio)
+- **实时语音转文字 (STT)**：使用 OpenAI Whisper 或浏览器原生 SpeechRecognition。
+- **情感化语音合成 (TTS)**：集成 ElevenLabs 或 OpenAI TTS，为 Agent 提供更具人性化的声音反馈。
+
+---
+
+## 11. 前端 Agent 性能优化策略
+Agent 的交互通常涉及大量的网络请求和数据处理，性能优化至关重要。
+
+### 11.1 智能预加载 (Smart Pre-fetching)
+- **上下文预加载**：当用户在输入框打字时，前端可以预先检索相关的 RAG 知识库片段。
+- **模型预热**：如果使用 WebLLM，在用户进入页面时提前加载模型权重到 WebGPU。
+
+### 11.2 流式渲染优化
+- **虚拟列表 (Virtual List)**：对于超长对话，使用虚拟列表避免 DOM 节点过多导致卡顿。
+- **增量更新**：仅对发生变化的 Markdown 节点进行重新渲染，而不是全量替换。
+
+---
+
+## 12. 总结与开发者建议
+前端 AI Agent 的开发是一场关于**交互深度**与**响应速度**的博弈。
+
+### 12.1 核心原则
+1. **透明性**：永远让用户知道 Agent 正在做什么（思考中、搜索中、执行中）。
+2. **可控性**：提供“停止生成”和“撤销动作”的功能。
+3. **反馈闭环**：在 UI 中内置“赞/踩”功能，收集用户反馈以持续微调 Prompt。
+
+### 12.2 行动指南
+- **第一阶段**：构建一个稳定的流式对话界面，处理好 Markdown 渲染。
+- **第二阶段**：引入工具调用（Tool Use），实现前端与后端的逻辑联动。
+- **第三阶段**：探索 Generative UI 和多模态交互，打造极致的用户体验。
+
+---
+
+## 13. 结语
+前端开发者正处于 AI 浪潮的前沿。通过将 LLM 的推理能力与 Web 的丰富交互手段相结合，我们正在定义下一代人机交互的范式。
